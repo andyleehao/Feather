@@ -31,7 +31,7 @@ struct VersionHistoryView: View {
                             Button {
                                 _ = DownloadManager.shared.startDownload(
                                     from: downloadURL,
-                                    id: app.currentUniqueId
+                                    id: app.versionScopedId(for: version)
                                 )
 								dismiss()
                             } label: {
@@ -53,4 +53,3 @@ struct VersionHistoryView: View {
         }
     }
 }
-

@@ -19,8 +19,11 @@ struct DownloadButtonView: View {
 	@State private var cancellable: AnyCancellable?
 	
 	private var appExists: Bool {
-		guard let bundleId = app.id else { return false }
-		return storage.appExists(withIdentifier: bundleId)
+		guard
+			let bundleId = app.id,
+			let version = app.currentVersion
+		else { return false }
+		return storage.appVersionExists(identifier: bundleId, version: version)
 	}
 
 	var body: some View {

@@ -384,6 +384,18 @@ extension ASRepository {
 			"\(id ?? uuid.uuidString).\(downloadURL?.absoluteString ?? uuid.uuidString)"
 		}
 
+		// Version-scoped id to disambiguate concurrent version downloads
+		public func versionScopedId(version: String?, downloadURL: URL?) -> String {
+			let base = id ?? uuid.uuidString
+			let ver = (version ?? currentVersion ?? "0").trimmingCharacters(in: .whitespacesAndNewlines)
+			let urlPart = (downloadURL ?? currentDownloadUrl)?.absoluteString ?? uuid.uuidString
+			return "\(base).\(ver).\(urlPart)"
+		}
+
+		public func versionScopedId(for version: Version) -> String {
+			versionScopedId(version: version.version, downloadURL: version.downloadURL)
+		}
+
 		public struct Version: Decodable, Hashable, Identifiable, Comparable, Sendable {
 			public var id: String { version + (build ?? "") }
 			public var version: String

@@ -315,19 +315,19 @@ extension SourceAppsTableRepresentableView { class Coordinator: NSObject, UITabl
 			let versionsMenu = UIMenu(
 				title: .localized("Copy Download URLs"),
 				image: UIImage(systemName: "list.bullet"),
-				children: self._contextActions(for: entry.app, with: { version in
-					UIPasteboard.general.string = version?.absoluteString
+				children: self._contextActions(for: entry.app, with: { (ver, url) in
+					if let url { UIPasteboard.general.string = url.absoluteString }
 				}, image: UIImage(systemName: "doc.on.clipboard"))
 			)
 			
 			let downloadsMenu = UIMenu(
 				title: .localized("Previous Versions"),
 				image: UIImage(systemName: "square.and.arrow.down.on.square"),
-				children: self._contextActions(for: entry.app, with: { version in
-					if let url = version {
+				children: self._contextActions(for: entry.app, with: { (ver, url) in
+					if let url = url {
 						_ = DownloadManager.shared.startDownload(
 							from: url,
-							id: entry.app.currentUniqueId
+							id: entry.app.versionScopedId(version: ver, downloadURL: url)
 						)
 					}
 				}, image: UIImage(systemName: "arrow.down"))
@@ -341,7 +341,7 @@ extension SourceAppsTableRepresentableView { class Coordinator: NSObject, UITabl
 	
 	private func _contextActions(
 		for app: ASRepository.App,
-		with action: @escaping (URL?) -> Void,
+		with action: @escaping (_ versionString: String, _ url: URL?) -> Void,
 		image: UIImage?
 	) -> [UIAction] {
 		if let versions = app.versions, !versions.isEmpty {
@@ -350,7 +350,7 @@ extension SourceAppsTableRepresentableView { class Coordinator: NSObject, UITabl
 					title: version.version,
 					image: image
 				) { _ in
-					action(version.downloadURL)
+					action(version.version, version.downloadURL)
 				}
 			}
 		} else {
@@ -359,7 +359,7 @@ extension SourceAppsTableRepresentableView { class Coordinator: NSObject, UITabl
 					title: app.currentVersion ?? "",
 					image: image
 				) { _ in
-					action(app.currentDownloadUrl)
+					action(app.currentVersion ?? "", app.currentDownloadUrl)
 				}
 			]
 		}

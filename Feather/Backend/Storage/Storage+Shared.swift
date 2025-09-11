@@ -57,6 +57,26 @@ extension Storage {
 			return false
 		}
 	}
+
+	/// Checks if a specific app version exists in storage.
+	/// Uses both bundle identifier and version to determine existence.
+	func appVersionExists(identifier: String, version: String) -> Bool {
+		let signedRequest: NSFetchRequest<Signed> = Signed.fetchRequest()
+		signedRequest.predicate = NSPredicate(format: "identifier == %@ AND version == %@", identifier, version)
+		signedRequest.fetchLimit = 1
+
+		let importedRequest: NSFetchRequest<Imported> = Imported.fetchRequest()
+		importedRequest.predicate = NSPredicate(format: "identifier == %@ AND version == %@", identifier, version)
+		importedRequest.fetchLimit = 1
+
+		do {
+			let signedCount = try context.count(for: signedRequest)
+			let importedCount = try context.count(for: importedRequest)
+			return signedCount > 0 || importedCount > 0
+		} catch {
+			return false
+		}
+	}
 }
 
 // MARK: - Helpers
